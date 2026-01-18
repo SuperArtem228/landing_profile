@@ -1,0 +1,684 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
+import { Mail, Linkedin, FileText, Send, Sun, Moon, ChevronDown, ExternalLink } from 'lucide-react';
+
+// Design Tokens - Golden Apple Style
+const tokens = {
+  light: {
+    bgPrimary: '#F8F8F8',
+    bgSecondary: '#EBEBEB',
+    bgTertiary: '#DADADA',
+    textPrimary: '#0D0E0A',
+    textSecondary: '#85858D',
+    strokeSoft: 'rgba(0, 0, 0, 0.08)',
+    accentLime: '#DFF73D',
+    accentLime2: '#CEE30A',
+    accentLimeDark: '#758215',
+    accentPink: '#FB6ACA',
+    chrome: '#D6D7D7',
+    glass: 'rgba(255, 255, 255, 0.6)',
+    glassBorder: 'rgba(0, 0, 0, 0.08)'
+  },
+  dark: {
+    bgPrimary: '#0D0E0A',
+    bgSecondary: '#1A1B17',
+    bgTertiary: '#2A2B27',
+    textPrimary: '#F8F8F8',
+    textSecondary: '#85858D',
+    strokeSoft: 'rgba(255, 255, 255, 0.1)',
+    accentLime: '#DFF73D',
+    accentLime2: '#CEE30A',
+    accentLimeDark: '#758215',
+    accentPink: '#FB6ACA',
+    chrome: '#D6D7D7',
+    glass: 'rgba(26, 27, 23, 0.6)',
+    glassBorder: 'rgba(255, 255, 255, 0.1)'
+  }
+};
+
+const keyResults = [
+  {
+    company: 'Itgro',
+    context: 'TravelTech B2B2C',
+    metric: '20% ? 62%',
+    label: '????????? ??? ? ??????',
+    levers: ['Self-serve ?????????', '?????????? ?????', '????????? ???? ?????????'],
+    period: '??? 2025 — ?.?.'
+  },
+  {
+    company: 'Itgro',
+    context: 'TravelTech B2B2C',
+    metric: '10 ? 3 ???',
+    label: '???? ??????????',
+    levers: ['??????????????', '?????????????', '???-?????/???????'],
+    period: '??? 2025 — ?.?.'
+  },
+  {
+    company: 'Itgro',
+    context: 'TravelTech B2B2C',
+    metric: '?45%',
+    label: '???????? ?? ???????',
+    levers: ['????????????????', '????????? ? ????????', '?????????? ???????'],
+    period: '??? 2025 — ?.?.'
+  },
+  {
+    company: 'Itgro',
+    context: 'TravelTech B2B2C',
+    metric: '?50%',
+    label: '????????? ????????????',
+    levers: ['?????????????', '??????????????', '???????? ??????? ?????'],
+    period: '??? 2025 — ?.?.'
+  },
+  {
+    company: '???????',
+    context: 'EdTech B2C',
+    metric: '21% ? 33%',
+    label: '????????? ???????? ?????',
+    levers: ['????????????', '???????? ????????', '????????? ??????'],
+    period: '??? 2024 — ??? 2025'
+  },
+  {
+    company: '???????',
+    context: 'EdTech B2C',
+    metric: '+10%',
+    label: '??????? ??? ? ???????????',
+    levers: ['????????', '????????? ??????? ?????'],
+    period: '??? 2024 — ??? 2025'
+  },
+  {
+    company: '???????',
+    context: 'EdTech B2C',
+    metric: '+3%',
+    label: 'LTV',
+    levers: ['?????????', '???????? ??????? ??????'],
+    period: '??? 2024 — ??? 2025'
+  },
+  {
+    company: 'Productoria',
+    context: 'ML B2B HoReCa',
+    metric: '5 / 4 ???',
+    label: '???????? ?? ??????',
+    levers: ['????? ?? ?????', 'GTM-?????'],
+    period: '??? 2023 — ??? 2024'
+  }
+];
+
+const experiences = [
+  {
+    company: 'Itgro',
+    role: 'Product Manager',
+    period: '?????? 2025 — ????????? ?????',
+    duration: '10 ???????',
+    achievements: [
+      '?????? ????????? ?? ???? ? ??????? ? 20% ?? 62%',
+      '???????? ???? ?????????? ? 10 ?? 3 ????',
+      '?????? ???????? ?? ??????? ?? 45%',
+      '???????? ????????? ???????????? ?? 50%'
+    ]
+  },
+  {
+    company: '??????? (VK)',
+    role: 'Product Manager',
+    period: '?????? 2024 — ?????? 2025',
+    duration: '1 ??? 1 ?????',
+    achievements: [
+      '??????? ??????? ??? ? ??????????? ?? 10%',
+      '???????? ????????? ???????? ????? ? 21% ?? 33%',
+      '??????? LTV ?? 3%'
+    ]
+  },
+  {
+    company: 'Productoria.space',
+    role: 'Product Manager',
+    period: '?????? 2023 — ???? 2024',
+    duration: '1 ??? 3 ??????',
+    achievements: [
+      '??????? 5 ???????? ?? 4 ??????',
+      '??????? ??? 400 ???. ???.',
+      '????? ML-??????? ?? ????? ?? discovery ?? ?????????'
+    ]
+  },
+  {
+    company: 'Productoria.space',
+    role: 'Product Analyst',
+    period: '??? 2022 — ??????? 2022',
+    duration: '8 ???????',
+    achievements: [
+      '?????? time-to-first-response ? 15 ?? 3 ?????',
+      '???????? ????????? ? ????? ?? 7%'
+    ]
+  }
+];
+
+const projects = [
+  {
+    title: 'TravelTech Growth',
+    category: 'Onboarding & Activation',
+    metrics: ['20?62%', '10?3 ???', '?45%', '?50%'],
+    levers: ['Self-serve ?????????', '?????????????', '??????????????']
+  },
+  {
+    title: 'EdTech Growth',
+    category: 'Conversion & Retention',
+    metrics: ['21?33%', '+10%', '+3% LTV'],
+    levers: ['????????????', '????????', '?????? ????']
+  },
+  {
+    title: 'ML B2B Launch',
+    category: 'Market Entry',
+    metrics: ['5 ????????', '4 ??????', '400k ???'],
+    levers: ['GTM-?????', '????????????????', '???????? ????????']
+  },
+  {
+    title: '??????? ?????? ? ?????',
+    category: 'Research Case',
+    metrics: ['????????? ??????'],
+    levers: ['????? ?? ?????', '?????????']
+  }
+];
+
+const skills = {
+  'Product': ['CustDev', 'JTBD', 'CJM', 'Roadmap', 'Product strategy', 'Discovery/Delivery', 'Product-led growth', 'PMF'],
+  'Experimentation & Metrics': ['A/B ?????', 'Unit-?????????', 'ARPU/LTV/CAC', '??????? ??????', 'DAU/WAU/MAU'],
+  'Analytics & Tools': ['SQL', 'Python', 'Amplitude', 'PowerBI/Superset', 'Excel'],
+  'AI & Automation': ['n8n', 'GPT', 'Cursor', 'Gemini agents']
+};
+
+const PortfolioApp = () => {
+  const [theme, setTheme] = useState('light');
+  const colors = tokens[theme];
+  const { scrollYProgress } = useScroll();
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(saved || (prefersDark ? 'dark' : 'light'));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+
+  // 3D Glossy Object Component
+  const GlossyBlob = () => {
+    const y = useTransform(scrollYProgress, [0, 0.3], [0, -50]);
+    
+    return (
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        style={{ y: prefersReducedMotion ? 0 : y }}
+      >
+        <motion.div
+          className="relative w-64 h-64 md:w-96 md:h-96"
+          animate={prefersReducedMotion ? {} : {
+            scale: [1, 1.05, 1],
+            rotate: [0, 5, 0]
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            repeatType: 'reverse'
+          }}
+        >
+          {/* Main glossy sphere */}
+          <div 
+            className="absolute inset-0 rounded-full opacity-40"
+            style={{
+              background: `radial-gradient(circle at 30% 30%, ${colors.accentLime}, ${colors.accentLime2})`,
+              filter: 'blur(40px)'
+            }}
+          />
+          <div 
+            className="absolute inset-8 rounded-full"
+            style={{
+              background: `linear-gradient(135deg, ${colors.accentLime} 0%, ${colors.accentLime2} 100%)`,
+              boxShadow: `0 20px 60px rgba(223, 247, 61, 0.3), inset 0 -20px 40px rgba(0,0,0,0.2), inset 0 20px 40px rgba(255,255,255,0.4)`
+            }}
+          />
+          {/* Highlight */}
+          <div 
+            className="absolute top-12 left-12 w-20 h-20 rounded-full opacity-60"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,255,255,0.8), transparent)'
+            }}
+          />
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  const GlassCard = ({ children, className = '', delay = 0 }) => {
+    return (
+      <motion.div
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 30 }}
+        whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-50px' }}
+        transition={{ duration: 0.5, delay }}
+        className={`backdrop-blur-xl rounded-3xl p-6 border transition-all ${className}`}
+        style={{
+          background: colors.glass,
+          borderColor: colors.glassBorder,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+        }}
+        whileHover={prefersReducedMotion ? {} : { scale: 1.02, transition: { duration: 0.2 } }}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+
+  const Pill = ({ children, variant = 'default', className = '' }) => {
+    const bg = variant === 'lime' ? colors.accentLime : 
+                variant === 'chrome' ? colors.chrome : colors.bgTertiary;
+    const text = variant === 'lime' ? colors.textPrimary : colors.textPrimary;
+
+    return (
+      <span 
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${className}`}
+        style={{ background: bg, color: text }}
+      >
+        {children}
+      </span>
+    );
+  };
+
+  const IconButton = ({ icon: Icon, href, ariaLabel }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={ariaLabel}
+      className="w-12 h-12 rounded-full backdrop-blur-xl flex items-center justify-center border transition-all hover:scale-110"
+      style={{
+        background: colors.glass,
+        borderColor: colors.glassBorder
+      }}
+    >
+      <Icon size={20} style={{ color: colors.textPrimary }} />
+    </a>
+  );
+
+  return (
+    <div 
+      className="min-h-screen relative overflow-hidden transition-colors duration-300"
+      style={{ 
+        background: colors.bgPrimary,
+        color: colors.textPrimary
+      }}
+    >
+      {/* Noise Overlay */}
+      <div 
+        className="fixed inset-0 pointer-events-none opacity-5 mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat'
+        }}
+      />
+
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <Pill variant="lime">????? ?????</Pill>
+          
+          <div className="flex gap-3">
+            <IconButton 
+              icon={FileText} 
+              href="https://ekaterinburg.hh.ru/resume/6d6458b5ff0fca29e60039ed1f366743483038"
+              ariaLabel="HH Resume"
+            />
+            <IconButton 
+              icon={Linkedin} 
+              href="https://www.linkedin.com/in/artem-popov-a05b65323/"
+              ariaLabel="LinkedIn"
+            />
+            <button
+              onClick={toggleTheme}
+              className="w-12 h-12 rounded-full backdrop-blur-xl flex items-center justify-center border transition-all hover:scale-110"
+              style={{
+                background: colors.glass,
+                borderColor: colors.glassBorder
+              }}
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section className="min-h-screen flex items-center justify-center px-6 pt-20 relative">
+        <GlossyBlob />
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.h1 
+            className="text-6xl md:text-8xl font-bold mb-6"
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            Product Manager
+          </motion.h1>
+          
+          <motion.p 
+            className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto"
+            style={{ color: colors.textSecondary }}
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            3+ ???? ?????. End-to-end ???????, ?????????, ???????????? ? AI-?????????????.
+          </motion.p>
+
+          <motion.div 
+            className="flex flex-wrap gap-4 justify-center"
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <a href="https://ekaterinburg.hh.ru/resume/6d6458b5ff0fca29e60039ed1f366743483038" target="_blank" rel="noopener noreferrer">
+              <button 
+                className="px-8 py-4 rounded-full font-medium transition-all hover:scale-105"
+                style={{ background: colors.accentLime, color: colors.textPrimary }}
+              >
+                ??????? ??????
+              </button>
+            </a>
+            <a href="https://t.me/K2a33b" target="_blank" rel="noopener noreferrer">
+              <button 
+                className="px-8 py-4 rounded-full font-medium backdrop-blur-xl border transition-all hover:scale-105"
+                style={{ background: colors.glass, borderColor: colors.glassBorder }}
+              >
+                ???????? ? Telegram
+              </button>
+            </a>
+            <a href="https://www.linkedin.com/in/artem-popov-a05b65323/" target="_blank" rel="noopener noreferrer">
+              <button 
+                className="px-8 py-4 rounded-full font-medium backdrop-blur-xl border transition-all hover:scale-105"
+                style={{ background: colors.glass, borderColor: colors.glassBorder }}
+              >
+                LinkedIn
+              </button>
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Key Results */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">???????? ??????????</h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6">
+            {keyResults.map((result, i) => (
+              <GlassCard key={i} delay={i * 0.1}>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-wrap gap-2">
+                    <Pill variant="default">{result.company}</Pill>
+                    <Pill variant="chrome" className="text-xs">{result.context}</Pill>
+                  </div>
+                  <span className="text-xs" style={{ color: colors.textSecondary }}>{result.period}</span>
+                </div>
+                
+                <div className="mb-3">
+                  <div 
+                    className="text-4xl md:text-5xl font-bold mb-2"
+                    style={{ color: colors.accentLime }}
+                  >
+                    {result.metric}
+                  </div>
+                  <div className="text-lg font-medium">{result.label}</div>
+                </div>
+
+                <div className="pt-3 border-t" style={{ borderColor: colors.strokeSoft }}>
+                  <div className="text-sm mb-2" style={{ color: colors.textSecondary }}>?? ????:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {result.levers.map((lever, j) => (
+                      <span 
+                        key={j}
+                        className="px-3 py-1 rounded-full text-xs border"
+                        style={{ 
+                          borderColor: colors.strokeSoft,
+                          background: colors.bgSecondary 
+                        }}
+                      >
+                        {lever}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Experience */}
+      <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">???? ??????</h2>
+          
+          <div className="space-y-6">
+            {experiences.map((exp, i) => (
+              <GlassCard key={i} delay={i * 0.1}>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-2xl font-bold">{exp.company}</h3>
+                    <p className="text-lg mt-1" style={{ color: colors.accentLimeDark }}>{exp.role}</p>
+                  </div>
+                  <div className="text-right text-sm" style={{ color: colors.textSecondary }}>
+                    <div>{exp.period}</div>
+                    <div className="mt-1">{exp.duration}</div>
+                  </div>
+                </div>
+
+                <ul className="space-y-2">
+                  {exp.achievements.map((ach, j) => (
+                    <li key={j} className="flex items-start gap-3">
+                      <div 
+                        className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
+                        style={{ background: colors.accentLime }}
+                      />
+                      <span>{ach}</span>
+                    </li>
+                  ))}
+                </ul>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Projects */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">??????? ? ?????</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {projects.map((project, i) => (
+              <GlassCard key={i} delay={i * 0.1}>
+                <div className="text-xs mb-2" style={{ color: colors.textSecondary }}>{project.category}</div>
+                <h3 className="text-2xl font-bold mb-4">{project.title}</h3>
+                
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {project.metrics.map((m, j) => (
+                    <Pill key={j} variant="lime" className="font-bold">
+                      {m}
+                    </Pill>
+                  ))}
+                </div>
+
+                <div className="text-sm" style={{ color: colors.textSecondary }}>
+                  <div className="mb-1">??????:</div>
+                  <div className="flex flex-wrap gap-1">
+                    {project.levers.map((lever, j) => (
+                      <span key={j}>
+                        {lever}{j < project.levers.length - 1 ? ', ' : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Skills */}
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">??????</h2>
+          
+          <div className="space-y-6">
+            {Object.entries(skills).map(([category, items], i) => (
+              <GlassCard key={i} delay={i * 0.1}>
+                <h3 
+                  className="text-xl font-bold mb-4"
+                  style={{ color: colors.accentLimeDark }}
+                >
+                  {category}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {items.map((skill, j) => (
+                    <span 
+                      key={j}
+                      className="px-4 py-2 rounded-full text-sm border"
+                      style={{ 
+                        borderColor: colors.strokeSoft,
+                        background: colors.bgSecondary 
+                      }}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Education */}
+      <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">???????????</h2>
+          
+          <GlassCard>
+            <h3 className="text-xl font-bold mb-4">?????? ???????????</h3>
+            <div className="space-y-3 mb-8">
+              <div>
+                <div className="font-medium">????????? ??????????? ???????????</div>
+                <div className="text-sm" style={{ color: colors.textSecondary }}>????????????? ????????? (Full Eng) • ?????? 2026</div>
+              </div>
+              <div>
+                <div className="font-medium">Beijing University</div>
+                <div className="text-sm" style={{ color: colors.textSecondary }}>2024 • ???????? ?? ??????</div>
+              </div>
+            </div>
+
+            <h3 className="text-xl font-bold mb-4">?????</h3>
+            <ul className="space-y-2" style={{ color: colors.textSecondary }}>
+              <li>2024 • Karpov.courses • ???????? ??????? ?? ?????? ??????</li>
+              <li>2024 • GoPractice • ????????? ?????????? ?????? ????????</li>
+              <li>2023 • GoPractice • SQL ??? ??????????? ?????????</li>
+            </ul>
+          </GlassCard>
+        </div>
+      </section>
+
+      {/* About */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">??? ???</h2>
+          
+          <GlassCard>
+            <p className="text-lg leading-relaxed" style={{ color: colors.textSecondary }}>
+              ? ??????????? ????????, ??????? ????? ???????? ???????, ??????? ???????? ? ??????? impact. 
+              ????????? ???? discovery ? delivery, ???? ?????? ? ?????? ? ???????? ? ????????. 
+              ?????? ????????????? ?????? ? ??????? ???????? ??????? ????? AI-???????????. 
+              ?????: TravelTech, EdTech, B2B SaaS, ML-????????.
+            </p>
+          </GlassCard>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section className="py-20 px-6 pb-32">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center">????????</h2>
+          
+          <GlassCard>
+            <div className="text-center mb-8">
+              <p className="text-lg" style={{ color: colors.textSecondary }}>
+                ?????? ? ?????????? ????? ????????????
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <a href="https://t.me/K2a33b" target="_blank" rel="noopener noreferrer">
+                <button 
+                  className="w-full px-6 py-4 rounded-full font-medium transition-all hover:scale-105 flex items-center justify-center gap-2"
+                  style={{ background: colors.accentLime, color: colors.textPrimary }}
+                >
+                  <Send size={20} /> Telegram
+                </button>
+              </a>
+              
+              <a href="mailto:artem.product.manager12@gmail.com">
+                <button 
+                  className="w-full px-6 py-4 rounded-full font-medium backdrop-blur-xl border transition-all hover:scale-105 flex items-center justify-center gap-2"
+                  style={{ background: colors.glass, borderColor: colors.glassBorder }}
+                >
+                  <Mail size={20} /> Email
+                </button>
+              </a>
+
+              <a href="https://www.linkedin.com/in/artem-popov-a05b65323/" target="_blank" rel="noopener noreferrer">
+                <button 
+                  className="w-full px-6 py-4 rounded-full font-medium backdrop-blur-xl border transition-all hover:scale-105 flex items-center justify-center gap-2"
+                  style={{ background: colors.glass, borderColor: colors.glassBorder }}
+                >
+                  <Linkedin size={20} /> LinkedIn
+                </button>
+              </a>
+
+              <a href="https://ekaterinburg.hh.ru/resume/6d6458b5ff0fca29e60039ed1f366743483038" target="_blank" rel="noopener noreferrer">
+                <button 
+                  className="w-full px-6 py-4 rounded-full font-medium backdrop-blur-xl border transition-all hover:scale-105 flex items-center justify-center gap-2"
+                  style={{ background: colors.glass, borderColor: colors.glassBorder }}
+                >
+                  <FileText size={20} /> ?????? HH
+                </button>
+              </a>
+            </div>
+          </GlassCard>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer 
+        className="py-8 px-6 border-t"
+        style={{ borderColor: colors.strokeSoft }}
+      >
+        <div className="max-w-7xl mx-auto text-center text-sm" style={{ color: colors.textSecondary }}>
+          <p>© 2026 ????? ????? • Product Manager</p>
+          <p className="mt-2">??????? (??????) • English C1</p>
+        </div>
+      </footer>
+
+      {/* Scroll Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 origin-left z-50"
+        style={{
+          scaleX: scrollYProgress,
+          background: colors.accentLime
+        }}
+      />
+    </div>
+  );
+};
+
+export default PortfolioApp
